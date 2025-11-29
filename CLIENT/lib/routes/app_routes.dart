@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../features/home/screens/home_screen.dart';
 import '../features/letter/screens/letter_list_screen.dart';
@@ -18,21 +17,45 @@ class AppRoutes {
 }
 
 final GoRouter appRouter = GoRouter(
+  initialLocation: '/',
   routes: [
+    // Home
     GoRoute(
       path: '/',
-      builder: (context, state) => const FormSuratPage(),
+      builder: (context, state) => const HomeScreen(),
     ),
 
+    // Form Surat (dari rekan)
     GoRoute(
       path: AppRoutes.formSurat,
       builder: (context, state) => const FormSuratPage(),
     ),
+
+    // HRD List (dari rekan)
+    GoRoute(
+      path: AppRoutes.hrdList,
+      builder: (context, state) => const HrdListPage(),
+    ),
+
+    // Detail Surat (dari rekan)
+    GoRoute(
+      path: AppRoutes.detailSurat,
+      builder: (context, state) =>
+          HrdDetailPage(surat: state.extra as Map<String, dynamic>),
+    ),
+
+    // Letter Template Management
+    GoRoute(
+      path: '/letters',
+      builder: (context, state) => const LettersListScreen(),
+    ),
+
     // Create template baru
     GoRoute(
       path: '/letter/template/create',
       builder: (context, state) => const LetterTemplateFormScreen(),
     ),
+
     // Edit template
     GoRoute(
       path: '/letter/template/edit',
@@ -41,6 +64,7 @@ final GoRouter appRouter = GoRouter(
         return LetterTemplateFormScreen(template: template);
       },
     ),
+
     // Generate surat dari template
     GoRoute(
       path: '/letter/create',
@@ -50,10 +74,13 @@ final GoRouter appRouter = GoRouter(
       },
     ),
 
+    // Letter Detail
     GoRoute(
-      path: AppRoutes.detailSurat,
-      builder: (context, state) =>
-          HrdDetailPage(surat: state.extra as Map<String, dynamic>),
+      path: '/letter/:id',
+      builder: (context, state) {
+        final id = int.parse(state.pathParameters['id']!);
+        return LetterDetailScreen(id: id);
+      },
     ),
   ],
 );

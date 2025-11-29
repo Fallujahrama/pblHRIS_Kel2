@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:tracer_study_test_api/routes/app_routes.dart';
 
 
 class ApiService {

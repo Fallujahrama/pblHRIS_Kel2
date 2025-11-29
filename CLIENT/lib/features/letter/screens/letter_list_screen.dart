@@ -25,7 +25,72 @@ class _LettersListScreenState extends State<LettersListScreen> {
     setState(() => isLoading = true);
     formats = await controller.fetchLetterFormats();
     setState(() => isLoading = false);
-    print('Loaded ${formats.length} formats'); // Debug
+    print('Loaded ${formats.length} formats');
+  }
+
+  void _showTemplateDetail(LetterFormat format) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(format.name),
+        content: SingleChildScrollView(
+          child: Text(format.content),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text('Tutup'),
+          ),
+          TextButton.icon(
+            onPressed: () {
+              context.pop();
+              context.push('/letter/template/edit', extra: format);
+            },
+            icon: const Icon(Icons.edit),
+            label: const Text('Edit'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _deleteTemplate(LetterFormat format) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Hapus Template'),
+        content: Text('Apakah Anda yakin ingin menghapus template "${format.name}"?'),
+        actions: [
+          TextButton(
+            onPressed: () => context.pop(false),
+            child: const Text('Batal'),
+          ),
+          TextButton(
+            onPressed: () => context.pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Hapus'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm == true) {
+      try {
+        await controller.deleteLetterFormat(format.id);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Template "${format.name}" berhasil dihapus')),
+          );
+          loadData(); // Reload list
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: $e')),
+          );
+        }
+      }
+    }
   }
 
   @override
@@ -36,7 +101,7 @@ class _LettersListScreenState extends State<LettersListScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.go('/'),
         ),
-        title: const Text("Template Surat"),
+        title: const Text("Kelola Template Surat"),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
@@ -47,7 +112,22 @@ class _LettersListScreenState extends State<LettersListScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : formats.isEmpty
-              ? const Center(child: Text("Tidak ada template surat"))
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.description_outlined, size: 64, color: Colors.grey),
+                      const SizedBox(height: 16),
+                      const Text("Belum ada template surat"),
+                      const SizedBox(height: 16),
+                      ElevatedButton.icon(
+                        onPressed: () => context.push('/letter/template/create'),
+                        icon: const Icon(Icons.add),
+                        label: const Text('Buat Template Baru'),
+                      ),
+                    ],
+                  ),
+                )
               : ListView.builder(
                   itemCount: formats.length,
                   itemBuilder: (_, i) {
@@ -58,23 +138,69 @@ class _LettersListScreenState extends State<LettersListScreen> {
                         vertical: 8,
                       ),
                       child: ListTile(
-                        leading: const CircleAvatar(
-                          child: Icon(Icons.description),
+                        leading: CircleAvatar(
+                          backgroundColor: Colors.blue.shade100,
+                          child: Text(
+                            item.name.substring(0, 1).toUpperCase(),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.blue,
+                            ),
+                          ),
                         ),
-                        title: Text(item.name),
+                        title: Text(
+                          item.name,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
+                        ),
                         subtitle: Text(
                           item.content,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        trailing: const Icon(Icons.arrow_forward_ios),
-                        onTap: () {
-                          context.push('/letter/create', extra: item);
-                        },
+                        trailing: PopupMenuButton(
+                          itemBuilder: (context) => [
+                            const PopupMenuItem(
+                              value: 'edit',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.edit, size: 20),
+                                  SizedBox(width: 8),
+                                  Text('Edit'),
+                                ],
+                              ),
+                            ),
+                            const PopupMenuItem(
+                              value: 'delete',
+                              child: Row(
+                                children: [
+                                  Icon(Icons.delete, size: 20, color: Colors.red),
+                                  SizedBox(width: 8),
+                                  Text('Hapus', style: TextStyle(color: Colors.red)),
+                                ],
+                              ),
+                            ),
+                          ],
+                          onSelected: (value) {
+                            if (value == 'edit') {
+                              context.push('/letter/template/edit', extra: item);
+                            } else if (value == 'delete') {
+                              _deleteTemplate(item);
+                            }
+                          },
+                        ),
+                        onTap: () => _showTemplateDetail(item),
                       ),
                     );
                   },
                 ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () async {
+          final result = await context.push('/letter/template/create');
+          if (result == true) loadData(); // Reload jika sukses
+        },
+        icon: const Icon(Icons.add),
+        label: const Text('Buat Template'),
+      ),
     );
   }
 }

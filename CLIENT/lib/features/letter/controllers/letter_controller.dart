@@ -3,22 +3,29 @@ import '../services/letter_format_services.dart';
 import '../models/letter_format.dart';
 
 class LetterController {
-  final dio = Dio(BaseOptions(baseUrl: "http://127.0.0.1:8000"));
+  final dio = Dio(BaseOptions(baseUrl: "https://d2b93066964c.ngrok-free.app/api"));
 
   Future<Response> createLetter(Map<String, dynamic> data) async {
     return await dio.post('/api/letters', data: data);
   }
 
   Future<List<LetterFormat>> fetchLetterFormats() async {
-    try {
-      return await LetterFormatService.fetchLetterFormats();
-    } catch (e) {
-      print('Error fetching formats: $e');
-      return [];
-    }
+    return await LetterFormatService.fetchLetterFormats();
+  }
+
+  Future<LetterFormat> createLetterFormat(Map<String, dynamic> data) async {
+    return await LetterFormatService.createLetterFormat(data);
+  }
+
+  Future<LetterFormat> updateLetterFormat(int id, Map<String, dynamic> data) async {
+    return await LetterFormatService.updateLetterFormat(id, data);
+  }
+
+  Future<void> deleteLetterFormat(int id) async {
+    return await LetterFormatService.deleteLetterFormat(id);
   }
 
   String pdfUrl(int id) {
-    return "http://127.0.0.1:8000/letters/$id/pdf";
+    return "https://d2b93066964c.ngrok-free.app/api/letters/$id/pdf";
   }
 }

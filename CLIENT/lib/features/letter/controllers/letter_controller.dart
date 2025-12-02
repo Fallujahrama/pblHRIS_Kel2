@@ -3,7 +3,7 @@ import '../services/letter_format_services.dart';
 import '../models/letter_format.dart';
 
 class LetterController {
-  final dio = Dio(BaseOptions(baseUrl: "https://11407778a5e2.ngrok-free.app/api"));
+  final dio = Dio(BaseOptions(baseUrl: "http://127.0.0.1:8000/api"));
 
   Future<Response> createLetter(Map<String, dynamic> data) async {
     return await dio.post('/api/letters', data: data);
@@ -26,6 +26,6 @@ class LetterController {
   }
 
   String pdfUrl(int id) {
-    return "https://11407778a5e2.ngrok-free.app/api/letters/$id/pdf";
+    return "http://127.0.0.1:8000/api/letters/$id/pdf";
   }
 }

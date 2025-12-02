@@ -45,7 +45,8 @@ class HrdDetailPage extends StatelessWidget {
     );
 
     if (confirm == true && context.mounted) {
-      final success = await ApiService.updateStatus(surat['id'], status);
+      final result = await ApiService.updateStatus(surat['id'], status);
+      final success = result['success'] as bool? ?? false;
 
       if (context.mounted) {
         if (success) {
@@ -53,7 +54,7 @@ class HrdDetailPage extends StatelessWidget {
             SnackBar(
               content: Text(
                 status == 'approved'
-                    ? 'Surat berhasil disetujui'
+                    ? 'Surat berhasil disetujui dan PDF telah dibuat'
                     : 'Surat berhasil ditolak',
               ),
             ),
@@ -61,9 +62,45 @@ class HrdDetailPage extends StatelessWidget {
           context.pop(true); // Kembali ke list dan refresh
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gagal update status')),
+            SnackBar(
+              content: Text('Gagal update status: ${result['body']}'),
+              duration: const Duration(seconds: 5),
+            ),
           );
         }
+      }
+    }
+  }
+
+  Future<void> downloadPdf(BuildContext context) async {
+    try {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Mengunduh PDF...')),
+      );
+
+      final pdfBytes = await ApiService.downloadPdf(surat['id']);
+
+      if (pdfBytes != null && context.mounted) {
+        // PDF berhasil diunduh
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              'PDF berhasil diunduh: surat_${surat['id']}.pdf',
+            ),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        print('PDF downloaded: ${pdfBytes.length} bytes');
+      } else if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal mengunduh PDF')),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error: $e')),
+        );
       }
     }
   }
@@ -140,24 +177,45 @@ class HrdDetailPage extends StatelessWidget {
                 ],
               ),
             ] else
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: status == 'approved' ? Colors.green.shade50 : Colors.red.shade50,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: status == 'approved' ? Colors.green : Colors.red,
+              Column(
+                children: [
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: status == 'approved' ? Colors.green.shade50 : Colors.red.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: status == 'approved' ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    child: Text(
+                      'Surat sudah ${status == 'approved' ? 'disetujui' : 'ditolak'}',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: status == 'approved' ? Colors.green : Colors.red,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
-                child: Text(
-                  'Surat sudah ${status == 'approved' ? 'disetujui' : 'ditolak'}',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: status == 'approved' ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
+                  if (status == 'approved')
+                    Padding(
+                      padding: const EdgeInsets.only(top: 16),
+                      child: SizedBox(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed: () => downloadPdf(context),
+                          icon: const Icon(Icons.download),
+                          label: const Text('Download PDF'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                          ),
+                        ),
+                      ),
+                    ),
+                ],
               ),
           ],
         ),

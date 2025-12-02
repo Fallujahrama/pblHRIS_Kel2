@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Letter;
 use App\Models\LetterFormat;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class LetterController extends Controller
 {
@@ -93,16 +96,48 @@ class LetterController extends Controller
                 'status' => $request->status,
             ]);
 
+            // Jika approve, generate PDF
+            if ($request->status === 'approved' && !$letter->pdf_path) {
+                $this->generatePdf($letter);
+            }
+
             return response()->json([
                 'success' => true,
                 'message' => 'Status berhasil diupdate',
-                'data' => $letter
+                'data' => $letter->load('letterFormat')
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage()
             ], 500);
+        }
+    }
+
+    // Helper: Generate PDF dan simpan ke storage
+    private function generatePdf(Letter $letter)
+    {
+        try {
+            // Gunakan dompdf untuk generate PDF di backend
+            $pdf = Pdf::loadView('letters.template', [
+                'letter' => $letter,
+                'letterFormat' => $letter->letterFormat,
+            ]);
+
+            // Buat nama file
+            $filename = 'surat_' . $letter->id . '_' . now()->timestamp . '.pdf';
+            $path = 'letters/' . $filename;
+
+            // Simpan ke storage
+            Storage::disk('public')->put($path, $pdf->output());
+
+            // Update letter dengan path PDF
+            $letter->update(['pdf_path' => $path]);
+
+            return $path;
+        } catch (\Exception $e) {
+            Log::error('PDF Generation Error: ' . $e->getMessage());
+            throw $e;
         }
     }
 
@@ -117,6 +152,29 @@ class LetterController extends Controller
                 'success' => true,
                 'message' => 'Letter berhasil dihapus'
             ], 200);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    // GET download PDF
+    public function downloadPdf($id)
+    {
+        try {
+            $letter = Letter::findOrFail($id);
+
+            if (!$letter->pdf_path || !Storage::disk('public')->exists($letter->pdf_path)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'PDF tidak ditemukan'
+                ], 404);
+            }
+
+            $filePath = Storage::disk('public')->path($letter->pdf_path);
+            return response()->download($filePath, 'surat_' . $letter->id . '.pdf');
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,

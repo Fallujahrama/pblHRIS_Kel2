@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../models/letter_format.dart';
 
 class LetterFormatService {
-  static const String baseUrl = "https://11407778a5e2.ngrok-free.app/api";
+  static const String baseUrl = "http://127.0.0.1:8000/api";
 
   // GET all templates
   static Future<List<LetterFormat>> fetchLetterFormats() async {

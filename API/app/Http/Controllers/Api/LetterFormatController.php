@@ -46,8 +46,8 @@ class LetterFormatController extends Controller
         ]);
 
         $data = LetterFormat::create([
-            'name' => $request->name,
-            'content' => $request->content,
+            'name' => $request->input('name'),
+            'content' => $request->input('content'),
         ]);
 
         return response()->json([
@@ -75,8 +75,8 @@ class LetterFormatController extends Controller
         ]);
 
         $data->update([
-            'name' => $request->name,
-            'content' => $request->content,
+            'name' => $request->input('name'),
+            'content' => $request->input('content'),
         ]);
 
         return response()->json([

@@ -75,7 +75,8 @@ class _FormSuratPageState extends State<FormSuratPage> {
     };
 
     try {
-      final success = await ApiService.createSurat(data);
+      final result = await ApiService.createSurat(data);
+      final success = result['success'] as bool? ?? false;
       
       if (success && mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -87,7 +88,7 @@ class _FormSuratPageState extends State<FormSuratPage> {
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Gagal mengajukan surat')),
+            SnackBar(content: Text('Gagal mengajukan surat: ${result['body']}')),
           );
         }
       }

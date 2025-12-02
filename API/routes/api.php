@@ -16,3 +16,4 @@ Route::post('/letters', [LetterController::class, 'store']);
 Route::get('/letters/{id}', [LetterController::class, 'show']);
 Route::put('/letters/{id}/status', [LetterController::class, 'updateStatus']);
 Route::delete('/letters/{id}', [LetterController::class, 'destroy']);
+Route::get('/letters/{id}/download', [LetterController::class, 'downloadPdf']);

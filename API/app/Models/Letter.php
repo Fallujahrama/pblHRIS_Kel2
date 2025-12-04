@@ -11,6 +11,7 @@ class Letter extends Model
 
     protected $fillable = [
         'letter_format_id',
+        'employee_id',
         'name',
         'jabatan',
         'departemen',
@@ -27,5 +28,11 @@ class Letter extends Model
     public function letterFormat()
     {
         return $this->belongsTo(LetterFormat::class);
+    }
+
+    // Relasi ke Employee
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class, 'employee_id');
     }
 }

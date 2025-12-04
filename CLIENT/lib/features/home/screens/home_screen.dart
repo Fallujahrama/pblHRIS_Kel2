@@ -101,6 +101,27 @@ class HomeScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              
+              const SizedBox(height: 16),
+              
+              // Tombol untuk Laporan - Rekap Karyawan
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => context.push('/employee-recap'),
+                  icon: const Icon(Icons.assessment),
+                  label: const Text('Laporan Rekap Karyawan'),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.purple,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                    textStyle: const TextStyle(fontSize: 16),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

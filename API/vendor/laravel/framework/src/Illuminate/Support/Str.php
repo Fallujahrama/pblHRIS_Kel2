@@ -1228,7 +1228,7 @@ class Str
      * @param  string|iterable<string>  $replace
      * @param  string|iterable<string>  $subject
      * @param  bool  $caseSensitive
-     * @return string|string[]
+     * @return ($subject is string ? string : string[])
      */
     public static function replace($search, $replace, $subject, $caseSensitive = true)
     {
@@ -1748,10 +1748,12 @@ class Str
     public static function substrReplace($string, $replace, $offset = 0, $length = null)
     {
         if ($length === null) {
-            $length = strlen($string);
+            $length = static::length($string);
         }
 
-        return substr_replace($string, $replace, $offset, $length);
+        return mb_substr($string, 0, $offset)
+            .$replace
+            .mb_substr($string, $offset + $length);
     }
 
     /**

@@ -194,6 +194,12 @@
       "languageVersion": "3.2"
     },
     {
+      "name": "nested",
+      "rootUri": "file:///Users/fallujahramadi/.pub-cache/hosted/pub.dev/nested-1.0.0",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
+    },
+    {
       "name": "path",
       "rootUri": "file:///Users/fallujahramadi/.pub-cache/hosted/pub.dev/path-1.9.1",
       "packageUri": "lib/",
@@ -240,6 +246,12 @@
       "rootUri": "file:///Users/fallujahramadi/.pub-cache/hosted/pub.dev/printing-5.14.2",
       "packageUri": "lib/",
       "languageVersion": "3.3"
+    },
+    {
+      "name": "provider",
+      "rootUri": "file:///Users/fallujahramadi/.pub-cache/hosted/pub.dev/provider-6.1.5+1",
+      "packageUri": "lib/",
+      "languageVersion": "2.12"
     },
     {
       "name": "qr",
